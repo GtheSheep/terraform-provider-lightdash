@@ -1,0 +1,4 @@
+.terraform
+vendor/
+terraform-provider*
+env.vars
