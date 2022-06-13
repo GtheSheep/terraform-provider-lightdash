@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,7 +15,12 @@ type Client struct {
 	Username   string
 	Password   string
 	ApiURL     string
-	Cookies    []http.Cookie
+	Cookies    []*http.Cookie
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginResults struct {
@@ -40,17 +45,24 @@ type LoginResponse struct {
 // TODO: Convert to use a session
 func NewClient(url *string, username *string, password *string) (*Client, error) {
 	c := Client{
-		URL * url,
+		URL:        *url,
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
-		Username:   *token,
-		Password:   *account_id,
+		Username:   *username,
+		Password:   *password,
 		ApiURL:     fmt.Sprintf("%s/api/v1", *url),
 	}
 
 	if (url != nil) && (username != nil) && (password != nil) {
-		url := fmt.Sprintf("%s/login", c.ApiURL)
+		loginRequest := LoginRequest{
+			Email:    *username,
+			Password: *password,
+		}
+		loginRequestData, err := json.Marshal(loginRequest)
+		if err != nil {
+			return nil, err
+		}
 
-		req, err := http.NewRequest("POST", url, nil)
+		req, err := http.NewRequest("POST", fmt.Sprintf("%s/login", c.ApiURL), strings.NewReader(string(loginRequestData)))
 		if err != nil {
 			return nil, err
 		}
@@ -69,23 +81,25 @@ func NewClient(url *string, username *string, password *string) (*Client, error)
 	return &c, nil
 }
 
-func (c *Client) doRequest(req *http.Request) ([]byte, error, http.Cookies) {
+func (c *Client) doRequest(req *http.Request) ([]byte, error, []*http.Cookie) {
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
 	for _, cookie := range c.Cookies {
 		req.AddCookie(cookie)
 	}
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
 	if (res.StatusCode != http.StatusOK) && (res.StatusCode != 201) {
-		return nil, fmt.Errorf("%s url: %s, status: %d, body: %s", req.Method, req.URL, res.StatusCode, body)
+		return nil, fmt.Errorf("%s url: %s, status: %d, body: %s", req.Method, req.URL, res.StatusCode, body), nil
 	}
 
 	return body, err, res.Cookies()

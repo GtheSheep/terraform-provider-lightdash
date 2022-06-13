@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -41,7 +40,7 @@ func (c *Client) CreateInviteLink(email string) (*InviteLink, error) {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
+	body, err, _ := c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -58,19 +57,19 @@ func (c *Client) CreateInviteLink(email string) (*InviteLink, error) {
 func (c *Client) DeleteAllInviteLinks() (string, error) {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/invite-links", c.ApiURL), nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	body, err := c.doRequest(req)
+	body, err, _ := c.doRequest(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	inviteLinkResponse := InviteLinkResponse{}
 	err = json.Unmarshal(body, &inviteLinkResponse)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &inviteLinkResponse.Status, nil
+	return inviteLinkResponse.Status, nil
 }

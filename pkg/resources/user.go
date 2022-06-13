@@ -2,8 +2,6 @@ package resources
 
 import (
 	"context"
-	"encoding/json"
-	"strconv"
 
 	"github.com/gthesheep/terraform-provider-lightdash/pkg/lightdash"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -97,12 +95,17 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 	email := d.Get("email").(string)
 	role := d.Get("role").(string)
 
-	user, err := c.CreateUser(email, firstName, lastName, role)
+	user, err := c.CreateUser(email, firstName, lastName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(*user.UserUUID))
+	user, err = c.UpdateUser(user.UserUUID, role)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(user.UserUUID)
 
 	resourceUserRead(ctx, d, m)
 
@@ -114,7 +117,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	userID := d.Id()
 
 	if d.HasChange("role") {
-		_, err = c.UpdateUser(userID, d.Get("role").(string))
+		_, err := c.UpdateUser(userID, d.Get("role").(string))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -129,7 +132,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	status, err = c.DeleteUser(userID)
+	status, err := c.DeleteUser(userID)
 	if (status != "ok") || (err != nil) {
 		return diag.FromErr(err)
 	}

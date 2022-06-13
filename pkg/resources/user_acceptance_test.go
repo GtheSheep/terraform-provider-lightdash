@@ -16,7 +16,7 @@ func TestAccLightdashUserResource(t *testing.T) {
 
 	firstName := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 	lastName := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	email := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+	email := "gthesheep@gmail.com"
 	role := "editor"
 
 	resource.Test(t, resource.TestCase{

@@ -4,15 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
+
+const DEFAULT_PASSWORD = "password"
 
 type User struct {
 	UserUUID         string  `json:"userUuid,omitempty"`
 	FirstName        string  `json:"firstName,omitempty"`
 	LastName         string  `json:"lastName,omitempty"`
 	Email            string  `json:"email,omitempty"`
+	Password         string  `json:"password,omitempty"`
 	OrganizationUUID string  `json:"organizationUuid,omitempty"`
 	Role             string  `json:"role,omitempty"`
 	IsActive         bool    `json:"isActive,omitempty"`
@@ -36,7 +38,7 @@ func (c *Client) GetUser(userUUID string) (*User, error) {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
+	body, err, _ := c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -49,40 +51,38 @@ func (c *Client) GetUser(userUUID string) (*User, error) {
 
 	for i, user := range usersResponse.Results {
 		if user.UserUUID == userUUID {
-			return usersResponse.Results[i], nil
+			return &usersResponse.Results[i], nil
 		}
 	}
 
 	return nil, fmt.Errorf("Did not find user UUID %s", userUUID)
 }
 
-func (c *Client) CreateUser(email string, firstName string, lastName string, role string) (*User, error) {
+func (c *Client) CreateUser(email string, firstName string, lastName string) (*User, error) {
 	inviteLink, err := c.CreateInviteLink(email)
 	if err != nil {
 		return nil, err
 	}
 
 	newUser := User{
-		FirstName:  firstName.(string),
-		LastName:   lastName.(string),
-		Email:      email.(string),
-		InviteCode: inviteLink.InviteCode.(string),
-	}
-	if role != "" {
-		newUser.Role = role
+		FirstName:  firstName,
+		LastName:   lastName,
+		Email:      email,
+		InviteCode: &inviteLink.InviteCode,
+		Password:   DEFAULT_PASSWORD,
 	}
 
-	newUser, err := json.Marshal(newUser)
+	newUserData, err := json.Marshal(newUser)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/user", c.ApiURL), strings.NewReader(string(newUser)))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/user", c.ApiURL), strings.NewReader(string(newUserData)))
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
+	body, err, _ := c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -110,12 +110,12 @@ func (c *Client) UpdateUser(userID string, role string) (*User, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/org/users/%s", c.ApiURL, userID), strings.NewReader(string(updatedUserData)))
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/org/users/%s", c.ApiURL, userID), strings.NewReader(string(updatedUserData)))
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
+	body, err, _ := c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -130,21 +130,21 @@ func (c *Client) UpdateUser(userID string, role string) (*User, error) {
 }
 
 func (c *Client) DeleteUser(userID string) (string, error) {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/org/users/%s", c.ApiURL, userID), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/org/user/%s", c.ApiURL, userID), nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	body, err := c.doRequest(req)
+	body, err, _ := c.doRequest(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	userResponse := UserResponse{}
 	err = json.Unmarshal(body, &userResponse)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &userResponse.Status, nil
+	return userResponse.Status, nil
 }
