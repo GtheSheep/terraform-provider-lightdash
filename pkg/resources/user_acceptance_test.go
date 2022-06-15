@@ -3,19 +3,16 @@ package resources_test
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/gthesheep/terraform-provider-lightdash/pkg/lightdash"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// The destroy is currently testing the invite links in the current state as the user hasn't accepted
 func TestAccLightdashUserResource(t *testing.T) {
 
-	firstName := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	lastName := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 	email := "gthesheep@gmail.com"
 	role := "editor"
 
@@ -25,21 +22,17 @@ func TestAccLightdashUserResource(t *testing.T) {
 		CheckDestroy: testAccCheckLightdashUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLightdashUserResourceBasicConfig(firstName, lastName, email),
+				Config: testAccLightdashUserResourceBasicConfig(email),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLightdashUserExists("lightdash_user.test_user"),
-					resource.TestCheckResourceAttr("lightdash_user.test_user", "first_name", firstName),
-					resource.TestCheckResourceAttr("lightdash_user.test_user", "last_name", lastName),
 					resource.TestCheckResourceAttr("lightdash_user.test_user", "email", email),
 				),
 			},
 			// MODIFY
 			{
-				Config: testAccLightdashUserResourceFullConfig(firstName, lastName, email, role),
+				Config: testAccLightdashUserResourceFullConfig(email, role),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLightdashUserExists("lightdash_user.test_user"),
-					resource.TestCheckResourceAttr("lightdash_user.test_user", "first_name", firstName),
-					resource.TestCheckResourceAttr("lightdash_user.test_user", "last_name", lastName),
 					resource.TestCheckResourceAttr("lightdash_user.test_user", "email", email),
 					resource.TestCheckResourceAttr("lightdash_user.test_user", "role", role),
 				),
@@ -49,31 +42,27 @@ func TestAccLightdashUserResource(t *testing.T) {
 				ResourceName:            "lightdash_user.test_user",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{},
+				ImportStateVerifyIgnore: []string{"invite_code"},
 			},
 		},
 	})
 }
 
-func testAccLightdashUserResourceBasicConfig(firstName, lastName, email string) string {
+func testAccLightdashUserResourceBasicConfig(email string) string {
 	return fmt.Sprintf(`
 resource "lightdash_user" "test_user" {
-    first_name = "%s"
-    last_name = "%s"
     email = "%s"
 }
-`, firstName, lastName, email)
+`, email)
 }
 
-func testAccLightdashUserResourceFullConfig(firstName, lastName, email, role string) string {
+func testAccLightdashUserResourceFullConfig(email, role string) string {
 	return fmt.Sprintf(`
 resource "lightdash_user" "test_user" {
-    first_name = "%s"
-    last_name = "%s"
     email = "%s"
     role = "%s"
 }
-`, firstName, lastName, email, role)
+`, email, role)
 }
 
 func testAccCheckLightdashUserExists(resource string) resource.TestCheckFunc {
@@ -101,6 +90,14 @@ func testAccCheckLightdashUserDestroy(s *terraform.State) error {
 		if rs.Type != "lightdash_user" {
 			continue
 		}
+
+		if rs.Primary.Attributes["invite_code"] != "" {
+			_, err := apiClient.GetInviteLink(rs.Primary.Attributes["invite_code"])
+			if err == nil {
+				return fmt.Errorf("Invite link still exists")
+			}
+		}
+
 		_, err := apiClient.GetUser(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("User still exists")

@@ -2,3 +2,4 @@
 vendor/
 terraform-provider*
 env.vars
+.idea

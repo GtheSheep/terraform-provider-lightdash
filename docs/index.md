@@ -9,6 +9,7 @@ description: |-
 # lightdash Provider
 
 
+<a href="https://www.lightdash.com/" target="_blank"><img src="https://github.com/gthesheep/terraform-provider-lightdash/.assets/lightdash.jpg"/></a>
 
 
 

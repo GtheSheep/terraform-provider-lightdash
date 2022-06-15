@@ -21,17 +21,7 @@ var userSchema = map[string]*schema.Schema{
 	"email": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "User email address",
-	},
-	"first_name": &schema.Schema{
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "First name",
-	},
-	"last_name": &schema.Schema{
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Last name",
+		Description: "User email address to send invite link to",
 	},
 	"role": &schema.Schema{
 		Type:         schema.TypeString,
@@ -39,6 +29,11 @@ var userSchema = map[string]*schema.Schema{
 		Default:      "viewer",
 		Description:  "Type of role for the user, one of viewer/ editor/ admin",
 		ValidateFunc: validation.StringInSlice(roles, false),
+	},
+	"invite_code": &schema.Schema{
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Original invite code for the user",
 	},
 }
 
@@ -69,12 +64,6 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("first_name", user.FirstName); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("last_name", user.LastName); err != nil {
-		return diag.FromErr(err)
-	}
 	if err := d.Set("email", user.Email); err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,22 +79,33 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	firstName := d.Get("first_name").(string)
-	lastName := d.Get("last_name").(string)
 	email := d.Get("email").(string)
 	role := d.Get("role").(string)
 
-	user, err := c.CreateUser(email, firstName, lastName)
+	inviteLink, err := c.CreateInviteLink(email)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	user, err = c.UpdateUser(user.UserUUID, role)
+	newUser := lightdash.User{
+		Email:      email,
+		InviteCode: &inviteLink.InviteCode,
+		UserUUID:   inviteLink.UserUUID,
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	user, err := c.UpdateUser(newUser.UserUUID, role)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(user.UserUUID)
+
+	if err := d.Set("invite_code", &inviteLink.InviteCode); err != nil {
+		return diag.FromErr(err)
+	}
 
 	resourceUserRead(ctx, d, m)
 
@@ -132,9 +132,13 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	status, err := c.DeleteUser(userID)
+	inviteCode := d.Get("invite_code").(string)
+	status, err := c.DeleteInviteLink(inviteCode)
 	if (status != "ok") || (err != nil) {
-		return diag.FromErr(err)
+		status, err := c.DeleteUser(userID)
+		if (status != "ok") || (err != nil) {
+			return diag.FromErr(err)
+		}
 	}
 
 	return diags

@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-const DEFAULT_PASSWORD = "password"
-
 type User struct {
 	UserUUID         string  `json:"userUuid,omitempty"`
 	FirstName        string  `json:"firstName,omitempty"`
@@ -55,51 +53,23 @@ func (c *Client) GetUser(userUUID string) (*User, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("Did not find user UUID %s", userUUID)
+	return nil, fmt.Errorf("User not found UUID %s", userUUID)
 }
 
-func (c *Client) CreateUser(email string, firstName string, lastName string) (*User, error) {
-	inviteLink, err := c.CreateInviteLink(email)
-	if err != nil {
-		return nil, err
-	}
-
-	newUser := User{
-		FirstName:  firstName,
-		LastName:   lastName,
-		Email:      email,
-		InviteCode: &inviteLink.InviteCode,
-		Password:   DEFAULT_PASSWORD,
-	}
-
-	newUserData, err := json.Marshal(newUser)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/user", c.ApiURL), strings.NewReader(string(newUserData)))
-	if err != nil {
-		return nil, err
-	}
-
-	body, err, _ := c.doRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	userResponse := UserResponse{}
-	err = json.Unmarshal(body, &userResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	status, err := c.DeleteAllInviteLinks()
-	if (status != "ok") || (err != nil) {
-		return nil, err
-	}
-
-	return &userResponse.Results, nil
-}
+// func (c *Client) CreateUser(email string) (*User, error) {
+// 	inviteLink, err := c.CreateInviteLink(email)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	newUser := User{
+// 		Email:      email,
+// 		InviteCode: &inviteLink.InviteCode,
+// 		UserUUID: inviteLink.UserUUID,
+// 	}
+//
+// 	return &newUser, nil
+// }
 
 func (c *Client) UpdateUser(userID string, role string) (*User, error) {
 	updatedUser := User{

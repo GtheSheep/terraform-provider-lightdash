@@ -8,7 +8,7 @@ description: |-
 
 # lightdash_user (Resource)
 
-
+Adding a user will generate an email invite link in order for them to set their name and password.
 
 
 
@@ -17,9 +17,7 @@ description: |-
 
 ### Required
 
-- `email` (String) User email address
-- `first_name` (String) First name
-- `last_name` (String) Last name
+- `email` (String) User email address to send invite link to
 
 ### Optional
 
@@ -28,5 +26,6 @@ description: |-
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `invite_code` (String) Original invite code for the user
 
 
