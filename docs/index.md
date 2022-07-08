@@ -9,7 +9,6 @@ description: |-
 # lightdash Provider
 
 
-<a href="https://www.lightdash.com/" target="_blank"><img src="https://github.com/gthesheep/terraform-provider-lightdash/.assets/lightdash.jpg"/></a>
 
 
 
@@ -18,6 +17,7 @@ description: |-
 
 ### Optional
 
-- `password` (String) Password for your Lighdash account
-- `url` (String) URL for your Lighdash instance
-- `username` (String) Username for your Lighdash account
+- `password` (String) Password for your Lightdash account
+- `personal_access_token` (String) Personal Access Token for your Lightdash account
+- `url` (String) URL for your Lightdash instance
+- `username` (String) Username for your Lightdash account
