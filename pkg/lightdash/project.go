@@ -7,8 +7,25 @@ import (
 )
 
 type Project struct {
-	ProjectUUID string `json:"projectUuid,omitempty"`
-	Name        string `json:"name,omitempty"`
+	ProjectUUID         string              `json:"projectUuid,omitempty"`
+	Name                string              `json:"name,omitempty"`
+	OrganisationUUID    string              `json:"organizationUuid"`
+	Type                string              `json:"type"`
+	DbtConnection       DbtConnection       `json:"dbtConnection"`
+	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
+}
+
+type CreateProjectRequest struct {
+	OrganisationUUID    string              `json:"organizationUuid"`
+	Name                string              `json:"name"`
+	Type                string              `json:"type"`
+	DbtConnection       DbtConnection       `json:"dbtConnection"`
+	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
+}
+
+type CreateProjectResponse struct {
+	Results Project `json:"results"`
+	Status  string  `json:"status"`
 }
 
 type ProjectResponse struct {
@@ -47,15 +64,47 @@ func (c *Client) GetProject(projectUUID string) (*Project, error) {
 	return nil, fmt.Errorf("Project not found UUID %s", projectUUID)
 }
 
-// func (c *Client) CreateProject(name string) (*Project, error) {
-//
-// 	return &newProject, nil
-// }
-//
-// func (c *Client) UpdateProject(projectUUID string) (*Project, error) {
-//
-// 	return &projectResponse.Results, nil
-// }
+func (c *Client) CreateProject(organisationUUID, name, projectType string, dbtConnection DbtConnection, warehouseConnection WarehouseConnection) (*Project, error) {
+	createProjectRequest := CreateProjectRequest{
+		OrganisationUUID:    organisationUUID,
+		Name:                name,
+		Type:                projectType,
+		DbtConnection:       dbtConnection,
+		WarehouseConnection: warehouseConnection,
+	}
+	newProjectData, err := json.Marshal(createProjectRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/org/projects", c.ApiURL), strings.NewReader(string(newProjectData)))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err, _ := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	createProjectResponse := CreateProjectResponse{}
+	err = json.Unmarshal(body, &createProjectResponse)
+	if err != nil {
+		return nil, err
+	}
+	return &createProjectResponse.Results, nil
+}
+
+func (c *Client) UpdateProject(projectUUID string) (*Project, error) {
+
+	// TODO: Implement Updates
+	project, err := c.GetProject(projectUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
+}
 
 func (c *Client) DeleteProject(projectUUID string) (string, error) {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/org/projects/%s", c.ApiURL, projectUUID), nil)

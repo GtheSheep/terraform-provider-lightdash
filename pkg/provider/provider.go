@@ -20,10 +20,10 @@ func Provider() *schema.Provider {
 				Description: "URL for your Lightdash instance",
 			},
 			"username": &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("LIGHTDASH_USERNAME", nil),
-				Description: "Username for your Lightdash account",
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("LIGHTDASH_USERNAME", nil),
+				Description:   "Username for your Lightdash account",
 				ConflictsWith: []string{"personal_access_token"},
 			},
 			"password": &schema.Schema{
@@ -33,10 +33,10 @@ func Provider() *schema.Provider {
 				Description: "Password for your Lightdash account",
 			},
 			"personal_access_token": &schema.Schema{
-			Type: schema.TypeString,
-			Optional: true,
-			DefaultFunc: schema.EnvDefaultFunc("LIGHTDASH_TOKEN", nil),
-			Description: "Personal Access Token for your Lightdash account",
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("LIGHTDASH_TOKEN", nil),
+				Description: "Personal Access Token for your Lightdash account",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{},
@@ -56,8 +56,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	var diags diag.Diagnostics
 
-    if (url != "") && (personalAccessToken != "") {
-        c, err := lightdash.NewClient(&url, nil, nil, &personalAccessToken)
+	if (url != "") && (personalAccessToken != "") {
+		c, err := lightdash.NewClient(&url, nil, nil, &personalAccessToken)
 
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
@@ -69,7 +69,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		}
 
 		return c, diags
-    }
+	}
 	if (url != "") && (username != "") && (password != "") {
 		c, err := lightdash.NewClient(&url, &username, &password, nil)
 
