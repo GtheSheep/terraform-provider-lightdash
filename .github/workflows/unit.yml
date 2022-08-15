@@ -21,5 +21,6 @@ jobs:
       - name: make ${{ matrix.target }}
         run: make ${{ matrix.target }}
         env:
-          LIGHTDASH_TOKEN: ${{ secrets.LIGHTDASH_TOKEN }}
+          LIGHTDASH_USERNAME: ${{ secrets.LIGHTDASH_USERNAME }}
+          LIGHTDASH_PASSWORD: ${{ secrets.LIGHTDASH_PASSWORD }}
           LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
