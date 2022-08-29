@@ -49,7 +49,7 @@ resource "lightdash_project" "test_project" {
     organisation_uuid = data.lightdash_organization.test_org.organisation_uuid
     type = "DEVELOPMENT"
     dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
-    warehouse_connection_account = abc-123.eu-west-1
+    warehouse_connection_account = "abc-123.eu-west-1"
     warehouse_connection_role = "ACCOUNTADMIN"
     warehouse_connection_database = "DB"
     warehouse_connection_warehouse = "TEST_WH"
