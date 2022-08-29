@@ -10,7 +10,7 @@ import (
 
 var organizationSchema = map[string]*schema.Schema{
 	"organization_uuid": &schema.Schema{
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "UUID of the organization",
 	},

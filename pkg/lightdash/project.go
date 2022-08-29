@@ -78,7 +78,7 @@ func (c *Client) CreateProject(organisationUUID, name, projectType string, dbtCo
 		return nil, err
 	}
 
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/org/projects", c.ApiURL), strings.NewReader(string(newProjectData)))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/org/projects", c.ApiURL), strings.NewReader(string(newProjectData)))
 	if err != nil {
 		return nil, err
 	}
