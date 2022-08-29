@@ -10,10 +10,10 @@ import (
 )
 
 var (
-    projectTypes = []string{
-        "DEFAULT",
-        "DEVELOPMENT",
-    }
+	projectTypes = []string{
+		"DEFAULT",
+		"DEVELOPMENT",
+	}
 	wareHouseTypes = []string{
 		"snowflake",
 	}
@@ -34,85 +34,85 @@ var projectSchema = map[string]*schema.Schema{
 		Description: "Project name",
 	},
 	"type": &schema.Schema{
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Type of project to create, either DEFAULT or DEVELOPMENT",
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Type of project to create, either DEFAULT or DEVELOPMENT",
 		ValidateFunc: validation.StringInSlice(projectTypes, false),
 	},
-    "dbt_connection_type": &schema.Schema{
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default: "github",
-		Description: "dbt project connection type, currently only support 'github', which is the default",
+	"dbt_connection_type": &schema.Schema{
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "github",
+		Description:  "dbt project connection type, currently only support 'github', which is the default",
 		ValidateFunc: validation.StringInSlice(dbtConnectionTypes, false),
 	},
 	"dbt_connection_repository": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-        Description: "Repository name in <org>/<repo> format",
-    },
-    "dbt_connection_branch": &schema.Schema{
+		Description: "Repository name in <org>/<repo> format",
+	},
+	"dbt_connection_branch": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default: "main",
-        Description: "Branch to use, default 'main'",
-    },
-    "dbt_connection_project_sub_path": &schema.Schema{
+		Default:     "main",
+		Description: "Branch to use, default 'main'",
+	},
+	"dbt_connection_project_sub_path": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default: "/",
-        Description: "Sub path to find the project in the repo, default '/'",
-    },
-    "dbt_connection_host_domain": &schema.Schema{
+		Default:     "/",
+		Description: "Sub path to find the project in the repo, default '/'",
+	},
+	"dbt_connection_host_domain": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default: "github.com",
-        Description: "Host domain of the repo, default 'github.com'",
-    },
-    "warehouse_connection_type":  &schema.Schema{
+		Default:     "github.com",
+		Description: "Host domain of the repo, default 'github.com'",
+	},
+	"warehouse_connection_type": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default: "snowflake",
-        Description: "Type of warehouse to connect to, currently only 'snowflake', as a default",
-    },
-    "warehouse_connection_account":  &schema.Schema{
+		Default:     "snowflake",
+		Description: "Type of warehouse to connect to, currently only 'snowflake', as a default",
+	},
+	"warehouse_connection_account": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-        Description: "Account identifier, including region/ cloud path",
-    },
-    "warehouse_connection_role":  &schema.Schema{
+		Description: "Account identifier, including region/ cloud path",
+	},
+	"warehouse_connection_role": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-        Description: "Role to connect to the warehouse with",
-    },
-    "warehouse_connection_database":  &schema.Schema{
+		Description: "Role to connect to the warehouse with",
+	},
+	"warehouse_connection_database": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-        Description: "Database to connect to",
-    },
-    "warehouse_connection_schema":  &schema.Schema{
+		Description: "Database to connect to",
+	},
+	"warehouse_connection_schema": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default: "PUBLIC",
-        Description: "Schema to connect to, default 'PUBLIC'",
-    },
-    "warehouse_connection_client_session_keep_alive":  &schema.Schema{
+		Default:     "PUBLIC",
+		Description: "Schema to connect to, default 'PUBLIC'",
+	},
+	"warehouse_connection_client_session_keep_alive": &schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default: false,
-        Description: "Client session keep alive param, default `false`",
-    },
-    "warehouse_connection_warehouse":  &schema.Schema{
+		Default:     false,
+		Description: "Client session keep alive param, default `false`",
+	},
+	"warehouse_connection_warehouse": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-        Description: "Warehouse to use",
-    },
-    "warehouse_connection_threads":  &schema.Schema{
+		Description: "Warehouse to use",
+	},
+	"warehouse_connection_threads": &schema.Schema{
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default: 1,
-        Description: "Number of threads to use, default `1`",
-    },
+		Default:     1,
+		Description: "Number of threads to use, default `1`",
+	},
 }
 
 func ResourceProject() *schema.Resource {
@@ -193,7 +193,6 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
-
 func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*lightdash.Client)
 
@@ -207,32 +206,32 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	dbtConnectionBranch := d.Get("dbt_connection_branch").(string)
 	dbtConnectionProjectSubPath := d.Get("dbt_connection_project_sub_path").(string)
 	dbtConnectionHostDomain := d.Get("dbt_connection_host_domain").(string)
-    warehouseConnectionType := d.Get("warehouse_connection_type").(string)
-    warehouseConnectionAccount := d.Get("warehouse_connection_account").(string)
-    warehouseConnectionRole := d.Get("warehouse_connection_role").(string)
-    warehouseConnectionDatabase := d.Get("warehouse_connection_database").(string)
-    warehouseConnectionSchema := d.Get("warehouse_connection_schema").(string)
-    warehouseConnectionClientSessionKeepAlive := d.Get("warehouse_connection_client_session_keep_alive").(bool)
-    warehouseConnectionWarehouse := d.Get("warehouse_connection_warehouse").(string)
-    warehouseConnectionThreads := d.Get("warehouse_connection_threads").(int)
+	warehouseConnectionType := d.Get("warehouse_connection_type").(string)
+	warehouseConnectionAccount := d.Get("warehouse_connection_account").(string)
+	warehouseConnectionRole := d.Get("warehouse_connection_role").(string)
+	warehouseConnectionDatabase := d.Get("warehouse_connection_database").(string)
+	warehouseConnectionSchema := d.Get("warehouse_connection_schema").(string)
+	warehouseConnectionClientSessionKeepAlive := d.Get("warehouse_connection_client_session_keep_alive").(bool)
+	warehouseConnectionWarehouse := d.Get("warehouse_connection_warehouse").(string)
+	warehouseConnectionThreads := d.Get("warehouse_connection_threads").(int)
 
-    dbtConnection := lightdash.DbtConnection{
-        Type: dbtConnectionType,
-        Repository: dbtConnectionRepository,
-        Branch: dbtConnectionBranch,
-        ProjectSubPath: dbtConnectionProjectSubPath,
-        HostDomain: dbtConnectionHostDomain,
-    }
-    warehouseConnection := lightdash.WarehouseConnection{
-        Type: warehouseConnectionType,
-        Account: warehouseConnectionAccount,
-        Role: warehouseConnectionRole,
-        Database: warehouseConnectionDatabase,
-        Warehouse: warehouseConnectionWarehouse,
-        Schema: warehouseConnectionSchema,
-        ClientSessionKeepAlive: warehouseConnectionClientSessionKeepAlive,
-        Threads: warehouseConnectionThreads,
-    }
+	dbtConnection := lightdash.DbtConnection{
+		Type:           dbtConnectionType,
+		Repository:     dbtConnectionRepository,
+		Branch:         dbtConnectionBranch,
+		ProjectSubPath: dbtConnectionProjectSubPath,
+		HostDomain:     dbtConnectionHostDomain,
+	}
+	warehouseConnection := lightdash.WarehouseConnection{
+		Type:                   warehouseConnectionType,
+		Account:                warehouseConnectionAccount,
+		Role:                   warehouseConnectionRole,
+		Database:               warehouseConnectionDatabase,
+		Warehouse:              warehouseConnectionWarehouse,
+		Schema:                 warehouseConnectionSchema,
+		ClientSessionKeepAlive: warehouseConnectionClientSessionKeepAlive,
+		Threads:                warehouseConnectionThreads,
+	}
 
 	project, err := c.CreateProject(organisationUUID, name, projectType, dbtConnection, warehouseConnection)
 	if err != nil {
@@ -247,7 +246,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-    // TODO: Implement Updates
+	// TODO: Implement Updates
 
 	return resourceUserRead(ctx, d, m)
 }
@@ -260,9 +259,9 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 
 	status, err := c.DeleteProject(projectID)
-    if (status != "ok") || (err != nil) {
-        return diag.FromErr(err)
-    }
+	if (status != "ok") || (err != nil) {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }

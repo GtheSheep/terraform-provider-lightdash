@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-
 func TestAccLightdashProjectResource(t *testing.T) {
 
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
