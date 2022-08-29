@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gthesheep/terraform-provider-lightdash/pkg/lightdash"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -26,6 +27,7 @@ var projectSchema = map[string]*schema.Schema{
 	"organization_uuid": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
+		Sensitive:   true,
 		Description: "UUID of the organization to create the project in",
 	},
 	"name": &schema.Schema{
@@ -248,7 +250,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// TODO: Implement Updates
 
-	return resourceUserRead(ctx, d, m)
+	return resourceProjectRead(ctx, d, m)
 }
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

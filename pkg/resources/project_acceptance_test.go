@@ -47,7 +47,7 @@ data "lightdash_organization" "test_org" {
 resource "lightdash_project" "test_project" {
     name = "%s"
     organization_uuid = data.lightdash_organization.test_org.organization_uuid
-    type = "DEVELOPMENT"
+    type = "DEFAULT"
     dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
     warehouse_connection_account = "abc-123.eu-west-1"
     warehouse_connection_role = "ACCOUNTADMIN"

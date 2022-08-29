@@ -84,6 +84,7 @@ func (c *Client) CreateProject(organisationUUID, name, projectType string, dbtCo
 	}
 
 	body, err, _ := c.doRequest(req)
+
 	if err != nil {
 		return nil, err
 	}
