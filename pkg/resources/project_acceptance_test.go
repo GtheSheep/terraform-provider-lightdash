@@ -41,9 +41,12 @@ func TestAccLightdashProjectResource(t *testing.T) {
 
 func testAccLightdashProjectResourceBasicConfig(name string) string {
 	return fmt.Sprintf(`
+data "lightdash_organization" "test_org" {
+}
+
 resource "lightdash_project" "test_project" {
     name = "%s"
-    organisation_uuid =
+    organisation_uuid = data.lightdash_organization.test_org.organisation_uuid
     type = "DEVELOPMENT"
     dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
     warehouse_connection_account = abc-123.eu-west-1

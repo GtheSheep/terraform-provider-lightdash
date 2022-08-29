@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/gthesheep/terraform-provider-lightdash/pkg/data_sources"
 	"github.com/gthesheep/terraform-provider-lightdash/pkg/lightdash"
 	"github.com/gthesheep/terraform-provider-lightdash/pkg/resources"
 )
@@ -39,9 +40,12 @@ func Provider() *schema.Provider {
 				Description: "Personal Access Token for your Lightdash account",
 			},
 		},
-		DataSourcesMap: map[string]*schema.Resource{},
+		DataSourcesMap: map[string]*schema.Resource{
+			"lightdash_organization": data_sources.DatasourceOrganization(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
-			"lightdash_user": resources.ResourceUser(),
+			"lightdash_project": resources.ResourceProject(),
+			"lightdash_user":    resources.ResourceUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

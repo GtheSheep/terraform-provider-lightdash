@@ -23,10 +23,10 @@ var (
 )
 
 var projectSchema = map[string]*schema.Schema{
-	"organisation_uuid": &schema.Schema{
+	"organization_uuid": &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "UUID of the organisation to create the project in",
+		Description: "UUID of the organization to create the project in",
 	},
 	"name": &schema.Schema{
 		Type:        schema.TypeString,
@@ -144,7 +144,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err := d.Set("name", project.Name); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("organisation_uuid", project.OrganisationUUID); err != nil {
+	if err := d.Set("organization_uuid", project.OrganisationUUID); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("type", project.Type); err != nil {
@@ -199,7 +199,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 
 	name := d.Get("name").(string)
-	organisationUUID := d.Get("organisation_uuid").(string)
+	organizationUUID := d.Get("organization_uuid").(string)
 	projectType := d.Get("type").(string)
 	dbtConnectionType := d.Get("dbt_connection_type").(string)
 	dbtConnectionRepository := d.Get("dbt_connection_repository").(string)
@@ -233,7 +233,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		Threads:                warehouseConnectionThreads,
 	}
 
-	project, err := c.CreateProject(organisationUUID, name, projectType, dbtConnection, warehouseConnection)
+	project, err := c.CreateProject(organizationUUID, name, projectType, dbtConnection, warehouseConnection)
 	if err != nil {
 		return diag.FromErr(err)
 	}
