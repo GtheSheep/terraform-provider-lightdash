@@ -245,7 +245,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	return diags
 }
 
-func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// TODO: Implement Updates
 
 	return resourceUserRead(ctx, d, m)
