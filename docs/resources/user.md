@@ -8,7 +8,7 @@ description: |-
 
 # lightdash_user (Resource)
 
-Adding a user will generate an email invite link in order for them to set their name and password.
+
 
 
 

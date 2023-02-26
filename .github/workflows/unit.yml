@@ -1,0 +1,25 @@
+on:
+  pull_request:
+name: Unit tests
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - check-docs
+          - test
+          - test-acceptance
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - name: Install dependencies
+        run: make setup
+      - name: make ${{ matrix.target }}
+        run: make ${{ matrix.target }}
+        env:
+          LIGHTDASH_TOKEN: ${{ secrets.LIGHTDASH_TOKEN }}
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}

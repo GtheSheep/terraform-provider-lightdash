@@ -14,6 +14,7 @@ type Client struct {
 	HTTPClient *http.Client
 	Username   string
 	Password   string
+	Token      string
 	ApiURL     string
 	Cookies    []*http.Cookie
 }
@@ -43,13 +44,26 @@ type LoginResponse struct {
 }
 
 // TODO: Convert to use a session
-func NewClient(url *string, username *string, password *string) (*Client, error) {
+// TODO: Convert to 2 separate clients
+func NewClient(url *string, username *string, password *string, token *string) (*Client, error) {
 	c := Client{
 		URL:        *url,
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
-		Username:   *username,
-		Password:   *password,
 		ApiURL:     fmt.Sprintf("%s/api/v1", *url),
+	}
+
+	if (url != nil) && (token != nil) {
+	    c.Token = *token
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/org/projects", c.ApiURL), nil)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err, _ = c.doRequest(req)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if (url != nil) && (username != nil) && (password != nil) {
@@ -84,9 +98,13 @@ func NewClient(url *string, username *string, password *string) (*Client, error)
 func (c *Client) doRequest(req *http.Request) ([]byte, error, []*http.Cookie) {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
-	for _, cookie := range c.Cookies {
-		req.AddCookie(cookie)
-	}
+	if c.Token != "" {
+	    req.Header.Add("Authorization", fmt.Sprintf("ApiKey %s", c.Token))
+	} else {
+        for _, cookie := range c.Cookies {
+            req.AddCookie(cookie)
+        }
+    }
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err, nil
