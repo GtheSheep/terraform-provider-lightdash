@@ -9,10 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Get Lightdash
         uses: actions/checkout@v2
         with:
           repository: lightdash/lightdash
           path: './lightdash'
-      - name: Test
-        run: ls .
+
+      - name: Setup Lightdash
+        run: yes '' | ./scripts/install.sh
+        working_dir: lightdash
