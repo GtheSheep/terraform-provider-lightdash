@@ -2,7 +2,6 @@ package resources
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gthesheep/terraform-provider-lightdash/pkg/lightdash"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
