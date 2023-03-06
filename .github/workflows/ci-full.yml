@@ -13,5 +13,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: lightdash/lightdash
+          path: './lightdash'
       - name: Test
         run: ls .
