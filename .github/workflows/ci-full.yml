@@ -1,0 +1,17 @@
+on:
+  pull_request:
+    branches:
+      - main
+name: Acceptance tests
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get Lightdash
+        uses: actions/checkout@v2
+        with:
+          repository: lightdash/lightdash
+      - name: Test
+        run: ls .
