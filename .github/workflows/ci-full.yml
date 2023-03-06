@@ -18,4 +18,4 @@ jobs:
 
       - name: Setup Lightdash
         run: yes '' | ./scripts/install.sh
-        working_dir: lightdash
+        working-directory: ./lightdash
