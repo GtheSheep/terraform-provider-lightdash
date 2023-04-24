@@ -53,7 +53,7 @@ func NewClient(url *string, username *string, password *string, token *string) (
 	}
 
 	if (url != nil) && (token != nil) {
-	    c.Token = *token
+		c.Token = *token
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s/org/projects", c.ApiURL), nil)
 		if err != nil {
 			return nil, err
@@ -99,12 +99,12 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error, []*http.Cookie) {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 	if c.Token != "" {
-	    req.Header.Add("Authorization", fmt.Sprintf("ApiKey %s", c.Token))
+		req.Header.Add("Authorization", fmt.Sprintf("ApiKey %s", c.Token))
 	} else {
-        for _, cookie := range c.Cookies {
-            req.AddCookie(cookie)
-        }
-    }
+		for _, cookie := range c.Cookies {
+			req.AddCookie(cookie)
+		}
+	}
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err, nil

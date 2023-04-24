@@ -56,21 +56,6 @@ func (c *Client) GetUser(userUUID string) (*User, error) {
 	return nil, fmt.Errorf("User not found UUID %s", userUUID)
 }
 
-// func (c *Client) CreateUser(email string) (*User, error) {
-// 	inviteLink, err := c.CreateInviteLink(email)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	newUser := User{
-// 		Email:      email,
-// 		InviteCode: &inviteLink.InviteCode,
-// 		UserUUID: inviteLink.UserUUID,
-// 	}
-//
-// 	return &newUser, nil
-// }
-
 func (c *Client) UpdateUser(userID string, role string) (*User, error) {
 	updatedUser := User{
 		Role: role,
