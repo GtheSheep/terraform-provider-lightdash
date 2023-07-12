@@ -27,5 +27,3 @@ description: |-
 
 - `id` (String) The ID of this resource.
 - `invite_code` (String) Original invite code for the user
-
-
