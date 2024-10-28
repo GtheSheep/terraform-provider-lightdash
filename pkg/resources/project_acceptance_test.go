@@ -14,6 +14,7 @@ import (
 func TestAccLightdashProjectResource(t *testing.T) {
 
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	nameDatabricks := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -37,6 +38,29 @@ func TestAccLightdashProjectResource(t *testing.T) {
 			},
 		},
 	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLightdashProjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLightdashProjectResourceBasicDatabricksConfig(nameDatabricks),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLightdashProjectExists("lightdash_project.test_databricks_project"),
+					resource.TestCheckResourceAttr("lightdash_project.test_databricks_project", "name", nameDatabricks),
+				),
+			},
+			// MODIFY
+			// IMPORT
+			{
+				ResourceName:            "lightdash_project.test_databricks_project",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{},
+			},
+		},
+	})
 }
 
 func testAccLightdashProjectResourceBasicConfig(name string) string {
@@ -49,10 +73,30 @@ resource "lightdash_project" "test_project" {
     organization_uuid = data.lightdash_organization.test_org.organization_uuid
     type = "DEFAULT"
     dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
+		warehouse_connection_type = "snowflake"
     warehouse_connection_account = "abc-123.eu-west-1"
     warehouse_connection_role = "ACCOUNTADMIN"
     warehouse_connection_database = "DB"
     warehouse_connection_warehouse = "TEST_WH"
+}
+`, name)
+}
+
+func testAccLightdashProjectResourceBasicDatabricksConfig(name string) string {
+	return fmt.Sprintf(`
+data "lightdash_organization" "test_org" {
+}
+
+resource "lightdash_project" "test_databricks_project" {
+    name = "%s"
+    organization_uuid = data.lightdash_organization.test_org.organization_uuid
+    type = "DEFAULT"
+    dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
+		warehouse_connection_type = "databricks"
+    databricks_connection_server_host_name = "help-im-on-databricks.com"
+    databricks_connection_http_path = "moo/baa"
+    databricks_connection_personal_access_token = "abcdefg123"
+    databricks_connection_catalog = "PROD"
 }
 `, name)
 }

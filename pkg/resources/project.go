@@ -15,6 +15,7 @@ var (
 		"DEVELOPMENT",
 	}
 	wareHouseTypes = []string{
+		"databricks",
 		"snowflake",
 	}
 	dbtConnectionTypes = []string{
@@ -71,48 +72,69 @@ var projectSchema = map[string]*schema.Schema{
 		Description: "Host domain of the repo, default 'github.com'",
 	},
 	"warehouse_connection_type": &schema.Schema{
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "snowflake",
+		Description:  "Type of warehouse to connect to, must be one of 'snowflake' or 'databricks', 'snowflake' is the default",
+		ValidateFunc: validation.StringInSlice(wareHouseTypes, false),
+	},
+	"databricks_connection_server_host_name": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "snowflake",
-		Description: "Type of warehouse to connect to, currently only 'snowflake', as a default",
+		Description: "Databricks - Server host name for connection",
+	},
+	"databricks_connection_http_path": &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Databricks - HTTP path for connection",
+	},
+	"databricks_connection_personal_access_token": &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Databricks - Personal access token for connection",
+	},
+	"databricks_connection_catalog": &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Databricks - Catalog name for connection",
 	},
 	"warehouse_connection_account": &schema.Schema{
 		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Account identifier, including region/ cloud path",
+		Optional:    true,
+		Description: "Snowflake - Account identifier, including region/ cloud path",
 	},
 	"warehouse_connection_role": &schema.Schema{
 		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Role to connect to the warehouse with",
+		Optional:    true,
+		Description: "Snowflake - Role to connect to the warehouse with",
 	},
 	"warehouse_connection_database": &schema.Schema{
 		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Database to connect to",
+		Optional:    true,
+		Description: "Snowflake - Database to connect to",
 	},
 	"warehouse_connection_schema": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     "PUBLIC",
-		Description: "Schema to connect to, default 'PUBLIC'",
+		Description: "Snowflake - Schema to connect to, default 'PUBLIC'",
 	},
 	"warehouse_connection_client_session_keep_alive": &schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: "Client session keep alive param, default `false`",
+		Description: "Snowflake - Client session keep alive param, default `false`",
 	},
 	"warehouse_connection_warehouse": &schema.Schema{
 		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Warehouse to use",
+		Optional:    true,
+		Description: "Snowflake - Warehouse to use",
 	},
 	"warehouse_connection_threads": &schema.Schema{
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     1,
-		Description: "Number of threads to use, default `1`",
+		Description: "Snowflake - Number of threads to use, default `1`",
 	},
 }
 
@@ -169,6 +191,15 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err := d.Set("warehouse_connection_type", project.WarehouseConnection.Type); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("databricks_connection_server_host_name", project.WarehouseConnection.ServerHostName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("databricks_connection_http_path", project.WarehouseConnection.HTTPPath); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("databricks_connection_catalog", project.WarehouseConnection.Catalog); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("warehouse_connection_account", project.WarehouseConnection.Account); err != nil {
 		return diag.FromErr(err)
 	}
@@ -215,6 +246,10 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	warehouseConnectionClientSessionKeepAlive := d.Get("warehouse_connection_client_session_keep_alive").(bool)
 	warehouseConnectionWarehouse := d.Get("warehouse_connection_warehouse").(string)
 	warehouseConnectionThreads := d.Get("warehouse_connection_threads").(int)
+	databricksConnectionServerHostName := d.Get("databricks_connection_server_host_name").(string)
+	databricksConnectionHttpPath := d.Get("databricks_connection_http_path").(string)
+	databricksConnectionPersonalAccessToken := d.Get("databricks_connection_personal_access_token").(string)
+	databricksConnectionCatalog := d.Get("databricks_connection_catalog").(string)
 
 	dbtConnection := lightdash.DbtConnection{
 		Type:           dbtConnectionType,
@@ -224,14 +259,23 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		HostDomain:     dbtConnectionHostDomain,
 	}
 	warehouseConnection := lightdash.WarehouseConnection{
-		Type:                   warehouseConnectionType,
-		Account:                warehouseConnectionAccount,
-		Role:                   warehouseConnectionRole,
-		Database:               warehouseConnectionDatabase,
-		Warehouse:              warehouseConnectionWarehouse,
-		Schema:                 warehouseConnectionSchema,
-		ClientSessionKeepAlive: warehouseConnectionClientSessionKeepAlive,
-		Threads:                warehouseConnectionThreads,
+		Type: warehouseConnectionType,
+	}
+
+	if warehouseConnection.Type == "snowflake" {
+		warehouseConnection.Account = warehouseConnectionAccount
+		warehouseConnection.Role = warehouseConnectionRole
+		warehouseConnection.Database = warehouseConnectionDatabase
+		warehouseConnection.Warehouse = warehouseConnectionWarehouse
+		warehouseConnection.Schema = warehouseConnectionSchema
+		warehouseConnection.ClientSessionKeepAlive = warehouseConnectionClientSessionKeepAlive
+		warehouseConnection.Threads = warehouseConnectionThreads
+	}
+	if warehouseConnection.Type == "databricks" {
+		warehouseConnection.ServerHostName = databricksConnectionServerHostName
+		warehouseConnection.HTTPPath = databricksConnectionHttpPath
+		warehouseConnection.PersonalAccessToken = databricksConnectionPersonalAccessToken
+		warehouseConnection.Catalog = databricksConnectionCatalog
 	}
 
 	project, err := c.CreateProject(organizationUUID, name, projectType, dbtConnection, warehouseConnection)

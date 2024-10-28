@@ -10,11 +10,15 @@ type DbtConnection struct {
 
 type WarehouseConnection struct {
 	Type                   string `json:"type"`
-	Account                string `json:"account"`
-	Role                   string `json:"role"`
-	Database               string `json:"database"`
-	Warehouse              string `json:"warehouse"`
-	Schema                 string `json:"schema"`
-	ClientSessionKeepAlive bool   `json:"clientSessionKeepAlive"`
-	Threads                int    `json:"threads"`
+	Account                string `json:"account,omitempty"`
+	Role                   string `json:"role,omitempty"`
+	Database               string `json:"database,omitempty"`
+	Warehouse              string `json:"warehouse,omitempty"`
+	Schema                 string `json:"schema,omitempty"`
+	ClientSessionKeepAlive bool   `json:"clientSessionKeepAlive,omitempty"`
+	Threads                int    `json:"threads,omitempty"`
+	ServerHostName         string `json:"serverHostName,omitempty"`
+	HTTPPath               string `json:"httpPath,omitempty"`
+	PersonalAccessToken    string `json:"personalAccessToken,omitempty"`
+	Catalog                string `json:"catalog,omitempty"`
 }
