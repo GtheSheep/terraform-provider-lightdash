@@ -24,9 +24,14 @@ type CreateProjectRequest struct {
 	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
 }
 
+type CreateProjectResponseResults struct {
+	Project        Project `json:"project"`
+	HasContentCopy bool    `json:"hasContentCopy"`
+}
+
 type CreateProjectResponse struct {
-	Results Project `json:"results"`
-	Status  string  `json:"status"`
+	Results CreateProjectResponseResults `json:"results"`
+	Status  string                       `json:"status"`
 }
 
 type ProjectResponse struct {
@@ -94,7 +99,7 @@ func (c *Client) CreateProject(organisationUUID, name, projectType string, dbtCo
 	if err != nil {
 		return nil, err
 	}
-	return &createProjectResponse.Results, nil
+	return &createProjectResponse.Results.Project, nil
 }
 
 func (c *Client) UpdateProject(projectUUID string) (*Project, error) {
