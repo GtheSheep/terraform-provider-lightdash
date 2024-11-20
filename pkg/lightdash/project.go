@@ -12,6 +12,7 @@ type Project struct {
 	Name                string              `json:"name,omitempty"`
 	OrganisationUUID    string              `json:"organizationUuid"`
 	Type                string              `json:"type"`
+	DbtVersion          string              `json:"dbtVersion"`
 	DbtConnection       DbtConnection       `json:"dbtConnection"`
 	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
 }
@@ -20,6 +21,7 @@ type CreateProjectRequest struct {
 	OrganisationUUID    string              `json:"organizationUuid"`
 	Name                string              `json:"name"`
 	Type                string              `json:"type"`
+	DbtVersion          string              `json:"dbtVersion"`
 	DbtConnection       DbtConnection       `json:"dbtConnection"`
 	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
 }
@@ -70,11 +72,12 @@ func (c *Client) GetProject(projectUUID string) (*Project, error) {
 	return nil, fmt.Errorf("Project not found UUID %s", projectUUID)
 }
 
-func (c *Client) CreateProject(organisationUUID, name, projectType string, dbtConnection DbtConnection, warehouseConnection WarehouseConnection) (*Project, error) {
+func (c *Client) CreateProject(organisationUUID, name, projectType, dbtVersion string, dbtConnection DbtConnection, warehouseConnection WarehouseConnection) (*Project, error) {
 	createProjectRequest := CreateProjectRequest{
 		OrganisationUUID:    organisationUUID,
 		Name:                name,
 		Type:                projectType,
+		DbtVersion:          dbtVersion,
 		DbtConnection:       dbtConnection,
 		WarehouseConnection: warehouseConnection,
 	}

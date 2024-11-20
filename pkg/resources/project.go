@@ -41,6 +41,12 @@ var projectSchema = map[string]*schema.Schema{
 		Description:  "Type of project to create, either DEFAULT or DEVELOPMENT",
 		ValidateFunc: validation.StringInSlice(projectTypes, false),
 	},
+	"dbt_version": &schema.Schema{
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "v1.8",
+		Description:  "dbt version, defaults to v1.8",
+	},
 	"dbt_connection_type": &schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
@@ -71,6 +77,11 @@ var projectSchema = map[string]*schema.Schema{
 		Default:     "github.com",
 		Description: "Host domain of the repo, default 'github.com'",
 	},
+	"dbt_connection_personal_access_token": &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Personal access token to authenticate with Git provider",
+	},
 	"warehouse_connection_type": &schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
@@ -97,6 +108,11 @@ var projectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		Description: "Databricks - Catalog name for connection",
+	},
+	"databricks_connection_schema": &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Databricks - Schema name for connection",
 	},
 	"warehouse_connection_account": &schema.Schema{
 		Type:        schema.TypeString,
@@ -173,6 +189,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err := d.Set("type", project.Type); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("dbt_version", project.DbtConnection.Type); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("dbt_connection_type", project.DbtConnection.Type); err != nil {
 		return diag.FromErr(err)
 	}
@@ -198,6 +217,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 	if err := d.Set("databricks_connection_catalog", project.WarehouseConnection.Catalog); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("databricks_connection_schema", project.WarehouseConnection.Database); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("warehouse_connection_account", project.WarehouseConnection.Account); err != nil {
@@ -234,10 +256,12 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	organizationUUID := d.Get("organization_uuid").(string)
 	projectType := d.Get("type").(string)
 	dbtConnectionType := d.Get("dbt_connection_type").(string)
+	dbtVersion := d.Get("dbt_version").(string)
 	dbtConnectionRepository := d.Get("dbt_connection_repository").(string)
 	dbtConnectionBranch := d.Get("dbt_connection_branch").(string)
 	dbtConnectionProjectSubPath := d.Get("dbt_connection_project_sub_path").(string)
 	dbtConnectionHostDomain := d.Get("dbt_connection_host_domain").(string)
+	dbtConnectionPersonalAccessToken := d.Get("dbt_connection_personal_access_token").(string)
 	warehouseConnectionType := d.Get("warehouse_connection_type").(string)
 	warehouseConnectionAccount := d.Get("warehouse_connection_account").(string)
 	warehouseConnectionRole := d.Get("warehouse_connection_role").(string)
@@ -250,6 +274,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	databricksConnectionHttpPath := d.Get("databricks_connection_http_path").(string)
 	databricksConnectionPersonalAccessToken := d.Get("databricks_connection_personal_access_token").(string)
 	databricksConnectionCatalog := d.Get("databricks_connection_catalog").(string)
+	databricksConnectionSchema := d.Get("databricks_connection_schema").(string)
 
 	dbtConnection := lightdash.DbtConnection{
 		Type:           dbtConnectionType,
@@ -257,6 +282,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		Branch:         dbtConnectionBranch,
 		ProjectSubPath: dbtConnectionProjectSubPath,
 		HostDomain:     dbtConnectionHostDomain,
+		PersonalAccessToken: dbtConnectionPersonalAccessToken,
 	}
 	warehouseConnection := lightdash.WarehouseConnection{
 		Type: warehouseConnectionType,
@@ -276,9 +302,10 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		warehouseConnection.HTTPPath = databricksConnectionHttpPath
 		warehouseConnection.PersonalAccessToken = databricksConnectionPersonalAccessToken
 		warehouseConnection.Catalog = databricksConnectionCatalog
+		warehouseConnection.Database = databricksConnectionSchema
 	}
 
-	project, err := c.CreateProject(organizationUUID, name, projectType, dbtConnection, warehouseConnection)
+	project, err := c.CreateProject(organizationUUID, name, projectType, dbtVersion, dbtConnection, warehouseConnection)
 	if err != nil {
 		return diag.FromErr(err)
 	}
