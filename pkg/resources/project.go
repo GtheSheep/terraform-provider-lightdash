@@ -42,10 +42,10 @@ var projectSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.StringInSlice(projectTypes, false),
 	},
 	"dbt_version": &schema.Schema{
-		Type:         schema.TypeString,
-		Optional:     true,
-		Default:      "v1.8",
-		Description:  "dbt version, defaults to v1.8",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     "v1.8",
+		Description: "dbt version, defaults to v1.8",
 	},
 	"dbt_connection_type": &schema.Schema{
 		Type:         schema.TypeString,
@@ -277,11 +277,11 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	databricksConnectionSchema := d.Get("databricks_connection_schema").(string)
 
 	dbtConnection := lightdash.DbtConnection{
-		Type:           dbtConnectionType,
-		Repository:     dbtConnectionRepository,
-		Branch:         dbtConnectionBranch,
-		ProjectSubPath: dbtConnectionProjectSubPath,
-		HostDomain:     dbtConnectionHostDomain,
+		Type:                dbtConnectionType,
+		Repository:          dbtConnectionRepository,
+		Branch:              dbtConnectionBranch,
+		ProjectSubPath:      dbtConnectionProjectSubPath,
+		HostDomain:          dbtConnectionHostDomain,
 		PersonalAccessToken: dbtConnectionPersonalAccessToken,
 	}
 	warehouseConnection := lightdash.WarehouseConnection{

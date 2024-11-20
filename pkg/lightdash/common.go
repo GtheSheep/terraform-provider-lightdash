@@ -1,11 +1,11 @@
 package lightdash
 
 type DbtConnection struct {
-	Type           string `json:"type"`
-	Repository     string `json:"repository"`
-	Branch         string `json:"branch"`
-	ProjectSubPath string `json:"project_sub_path"`
-	HostDomain     string `json:"host_domain"`
+	Type                string `json:"type"`
+	Repository          string `json:"repository"`
+	Branch              string `json:"branch"`
+	ProjectSubPath      string `json:"project_sub_path"`
+	HostDomain          string `json:"host_domain"`
 	PersonalAccessToken string `json:"personal_access_token,omitempty"`
 }
 

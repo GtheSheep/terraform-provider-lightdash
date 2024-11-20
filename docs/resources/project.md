@@ -27,11 +27,14 @@ description: |-
 - `databricks_connection_catalog` (String) Databricks - Catalog name for connection
 - `databricks_connection_http_path` (String) Databricks - HTTP path for connection
 - `databricks_connection_personal_access_token` (String) Databricks - Personal access token for connection
+- `databricks_connection_schema` (String) Databricks - Schema name for connection
 - `databricks_connection_server_host_name` (String) Databricks - Server host name for connection
 - `dbt_connection_branch` (String) Branch to use, default 'main'
 - `dbt_connection_host_domain` (String) Host domain of the repo, default 'github.com'
+- `dbt_connection_personal_access_token` (String) Personal access token to authenticate with Git provider
 - `dbt_connection_project_sub_path` (String) Sub path to find the project in the repo, default '/'
 - `dbt_connection_type` (String) dbt project connection type, currently only support 'github', which is the default
+- `dbt_version` (String) dbt version, defaults to v1.8
 - `warehouse_connection_account` (String) Snowflake - Account identifier, including region/ cloud path
 - `warehouse_connection_client_session_keep_alive` (Boolean) Snowflake - Client session keep alive param, default `false`
 - `warehouse_connection_database` (String) Snowflake - Database to connect to
