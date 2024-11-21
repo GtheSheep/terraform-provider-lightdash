@@ -29,6 +29,13 @@ func TestAccLightdashProjectResource(t *testing.T) {
 				),
 			},
 			// MODIFY
+			{
+				Config: testAccLightdashProjectResourceFullConfig(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLightdashProjectExists("lightdash_project.test_project"),
+					resource.TestCheckResourceAttr("lightdash_project.test_project", "name", name),
+				),
+			},
 			// IMPORT
 			{
 				ResourceName:            "lightdash_project.test_project",
@@ -52,6 +59,13 @@ func TestAccLightdashProjectResource(t *testing.T) {
 				),
 			},
 			// MODIFY
+			{
+				Config: testAccLightdashProjectResourceFullDatabricksConfig(nameDatabricks),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLightdashProjectExists("lightdash_project.test_databricks_project"),
+					resource.TestCheckResourceAttr("lightdash_project.test_databricks_project", "name", nameDatabricks),
+				),
+			},
 			// IMPORT
 			{
 				ResourceName:            "lightdash_project.test_databricks_project",
@@ -82,6 +96,25 @@ resource "lightdash_project" "test_project" {
 `, name)
 }
 
+func testAccLightdashProjectResourceFullConfig(name string) string {
+	return fmt.Sprintf(`
+data "lightdash_organization" "test_org" {
+}
+
+resource "lightdash_project" "test_project" {
+    name = "%s"
+    organization_uuid = data.lightdash_organization.test_org.organization_uuid
+    type = "DEFAULT"
+    dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
+		warehouse_connection_type = "snowflake"
+    warehouse_connection_account = "abc-123.eu-west-1"
+    warehouse_connection_role = "ACCOUNTADMIN"
+    warehouse_connection_database = "DB"
+    warehouse_connection_warehouse = "TEST_2_WH"
+}
+`, name)
+}
+
 func testAccLightdashProjectResourceBasicDatabricksConfig(name string) string {
 	return fmt.Sprintf(`
 data "lightdash_organization" "test_org" {
@@ -97,6 +130,25 @@ resource "lightdash_project" "test_databricks_project" {
     databricks_connection_http_path = "moo/baa"
     databricks_connection_personal_access_token = "abcdefg123"
     databricks_connection_catalog = "PROD"
+}
+`, name)
+}
+
+func testAccLightdashProjectResourceFullDatabricksConfig(name string) string {
+	return fmt.Sprintf(`
+data "lightdash_organization" "test_org" {
+}
+
+resource "lightdash_project" "test_databricks_project" {
+    name = "%s"
+    organization_uuid = data.lightdash_organization.test_org.organization_uuid
+    type = "DEFAULT"
+    dbt_connection_repository = "gthesheep/terraform-provider-dbt-cloud"
+		warehouse_connection_type = "databricks"
+    databricks_connection_server_host_name = "help-im-on-databricks.com"
+    databricks_connection_http_path = "moo/baa"
+    databricks_connection_personal_access_token = "abcdefg123"
+    databricks_connection_catalog = "DEV"
 }
 `, name)
 }

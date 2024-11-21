@@ -26,6 +26,22 @@ type CreateProjectRequest struct {
 	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
 }
 
+type UpdateProjectRequest struct {
+	Name                string              `json:"name"`
+	DbtVersion          string              `json:"dbtVersion"`
+	DbtConnection       DbtConnection       `json:"dbtConnection"`
+	WarehouseConnection WarehouseConnection `json:"warehouseConnection"`
+}
+
+type jobResults struct {
+	jobUuid string `json:"jobUuid"`
+}
+
+type UpdateProjectResponse struct {
+	Status  string     `json:"status"`
+	Results jobResults `json:"results"`
+}
+
 type CreateProjectResponseResults struct {
 	Project        Project `json:"project"`
 	HasContentCopy bool    `json:"hasContentCopy"`
@@ -105,15 +121,41 @@ func (c *Client) CreateProject(organisationUUID, name, projectType, dbtVersion s
 	return &createProjectResponse.Results.Project, nil
 }
 
-func (c *Client) UpdateProject(projectUUID string) (*Project, error) {
+func (c *Client) UpdateProject(projectUUID, name, dbtVersion string, dbtConnection DbtConnection, warehouseConnection WarehouseConnection) (*Project, error) {
 
-	// TODO: Implement Updates
-	project, err := c.GetProject(projectUUID)
+	projectUpdates := UpdateProjectRequest{
+		Name:                name,
+		DbtVersion:          dbtVersion,
+		DbtConnection:       dbtConnection,
+		WarehouseConnection: warehouseConnection,
+	}
+	projectUpdateData, err := json.Marshal(projectUpdates)
 	if err != nil {
 		return nil, err
 	}
 
-	return project, nil
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/projects/%s", c.ApiURL, projectUUID), strings.NewReader(string(projectUpdateData)))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err, _ := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	updateProjectResponse := UpdateProjectResponse{}
+	err = json.Unmarshal(body, &updateProjectResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedProject, err := c.GetProject(projectUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedProject, nil
 }
 
 func (c *Client) DeleteProject(projectUUID string) (string, error) {

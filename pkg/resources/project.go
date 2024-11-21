@@ -318,7 +318,105 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// TODO: Implement Updates
+	c := m.(*lightdash.Client)
+	projectID := d.Id()
+
+	hasChange := false
+	for _, x1 := range []string{"name", "dbt_version"} {
+		if d.HasChange(x1) {
+			hasChange = true
+		}
+	}
+	for _, x2 := range []string{"dbt_connection_type", "dbt_connection_repository", "dbt_connection_branch", "dbt_connection_project_sub_path", "dbt_connection_host_domain", "dbt_connection_personal_access_token"} {
+		if d.HasChange(x2) {
+			hasChange = true
+		}
+	}
+	for _, x3 := range []string{"warehouse_connection_type", "warehouse_connection_account", "warehouse_connection_role", "warehouse_connection_database", "warehouse_connection_schema", "warehouse_connection_client_session_keep_alive", "warehouse_connection_warehouse", "warehouse_connection_threads"} {
+		if d.HasChange(x3) {
+			hasChange = true
+		}
+	}
+	for _, x4 := range []string{"databricks_connection_server_host_name", "databricks_connection_http_path", "databricks_connection_personal_access_token", "databricks_connection_catalog", "databricks_connection_schema"} {
+		if d.HasChange(x4) {
+			hasChange = true
+		}
+	}
+
+	if hasChange {
+		project, err := c.GetProject(projectID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if d.HasChange("name") {
+			project.Name = d.Get("name").(string)
+		}
+		if d.HasChange("dbt_version") {
+			project.DbtVersion = d.Get("dbt_version").(string)
+		}
+		if d.HasChange("dbt_connection_type") {
+			project.DbtConnection.Type = d.Get("dbt_connection_type").(string)
+		}
+		if d.HasChange("dbt_connection_repository") {
+			project.DbtConnection.Repository = d.Get("dbt_connection_repository").(string)
+		}
+		if d.HasChange("dbt_connection_branch") {
+			project.DbtConnection.Branch = d.Get("dbt_connection_branch").(string)
+		}
+		if d.HasChange("dbt_connection_project_sub_path") {
+			project.DbtConnection.ProjectSubPath = d.Get("dbt_connection_project_sub_path").(string)
+		}
+		if d.HasChange("dbt_connection_host_domain") {
+			project.DbtConnection.HostDomain = d.Get("dbt_connection_host_domain").(string)
+		}
+		if d.HasChange("dbt_connection_personal_access_token") {
+			project.DbtConnection.PersonalAccessToken = d.Get("dbt_connection_personal_access_token").(string)
+		}
+		if d.HasChange("warehouse_connection_type") {
+			project.WarehouseConnection.Type = d.Get("warehouse_connection_type").(string)
+		}
+		if d.HasChange("warehouse_connection_account") {
+			project.WarehouseConnection.Account = d.Get("warehouse_connection_account").(string)
+		}
+		if d.HasChange("warehouse_connection_role") {
+			project.WarehouseConnection.Role = d.Get("warehouse_connection_role").(string)
+		}
+		if d.HasChange("warehouse_connection_database") {
+			project.WarehouseConnection.Database = d.Get("warehouse_connection_database").(string)
+		}
+		if d.HasChange("warehouse_connection_schema") {
+			project.WarehouseConnection.Schema = d.Get("warehouse_connection_schema").(string)
+		}
+		if d.HasChange("warehouse_connection_client_session_keep_alive") {
+			project.WarehouseConnection.ClientSessionKeepAlive = d.Get("warehouse_connection_client_session_keep_alive").(bool)
+		}
+		if d.HasChange("warehouse_connection_warehouse") {
+			project.WarehouseConnection.Warehouse = d.Get("warehouse_connection_warehouse").(string)
+		}
+		if d.HasChange("warehouse_connection_threads") {
+			project.WarehouseConnection.Threads = d.Get("warehouse_connection_threads").(int)
+		}
+		if d.HasChange("databricks_connection_server_host_name") {
+			project.WarehouseConnection.ServerHostName = d.Get("databricks_connection_server_host_name").(string)
+		}
+		if d.HasChange("databricks_connection_http_path") {
+			project.WarehouseConnection.HTTPPath = d.Get("databricks_connection_http_path").(string)
+		}
+		if d.HasChange("databricks_connection_personal_access_token") {
+			project.WarehouseConnection.PersonalAccessToken = d.Get("databricks_connection_personal_access_token").(string)
+		}
+		if d.HasChange("databricks_connection_catalog") {
+			project.WarehouseConnection.Catalog = d.Get("databricks_connection_catalog").(string)
+		}
+		if d.HasChange("databricks_connection_schema") {
+			project.WarehouseConnection.Database = d.Get("databricks_connection_schema").(string)
+		}
+
+		_, err = c.UpdateProject(projectID, project.Name, project.DbtVersion, project.DbtConnection, project.WarehouseConnection)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
 
 	return resourceProjectRead(ctx, d, m)
 }
