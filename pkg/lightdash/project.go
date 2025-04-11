@@ -63,7 +63,7 @@ type ProjectsResponse struct {
 }
 
 func (c *Client) GetProject(projectUUID string) (*Project, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/org/projects", c.ApiURL), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/projects/%s", c.ApiURL, projectUUID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -73,19 +73,13 @@ func (c *Client) GetProject(projectUUID string) (*Project, error) {
 		return nil, err
 	}
 
-	projectsResponse := ProjectsResponse{}
-	err = json.Unmarshal(body, &projectsResponse)
+	projectResponse := ProjectResponse{}
+	err = json.Unmarshal(body, &projectResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, project := range projectsResponse.Results {
-		if project.ProjectUUID == projectUUID {
-			return &projectsResponse.Results[i], nil
-		}
-	}
-
-	return nil, fmt.Errorf("Project not found UUID %s", projectUUID)
+	return &projectResponse.Results, nil
 }
 
 func (c *Client) CreateProject(organisationUUID, name, projectType, dbtVersion string, dbtConnection DbtConnection, warehouseConnection WarehouseConnection) (*Project, error) {
