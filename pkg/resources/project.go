@@ -189,7 +189,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err := d.Set("type", project.Type); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("dbt_version", project.DbtConnection.Type); err != nil {
+	if err := d.Set("dbt_version", project.DbtVersion); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("dbt_connection_type", project.DbtConnection.Type); err != nil {
