@@ -219,7 +219,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err := d.Set("databricks_connection_catalog", project.WarehouseConnection.Catalog); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("databricks_connection_schema", project.WarehouseConnection.Database); err != nil {
+	if err := d.Set("databricks_connection_schema", project.WarehouseConnection.Schema); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("warehouse_connection_account", project.WarehouseConnection.Account); err != nil {
@@ -409,7 +409,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			project.WarehouseConnection.Catalog = d.Get("databricks_connection_catalog").(string)
 		}
 		if d.HasChange("databricks_connection_schema") {
-			project.WarehouseConnection.Database = d.Get("databricks_connection_schema").(string)
+			project.WarehouseConnection.Schema = d.Get("databricks_connection_schema").(string)
 		}
 
 		_, err = c.UpdateProject(projectID, project.Name, project.DbtVersion, project.DbtConnection, project.WarehouseConnection)
